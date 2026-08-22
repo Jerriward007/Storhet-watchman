@@ -1,0 +1,37 @@
+{
+  "name": "Insight",
+  "type": "object",
+  "properties": {
+    "brand_name": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "daily_summary": {
+      "type": "string"
+    },
+    "top_complaints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "top_praises": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trending_issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "brand_name",
+    "daily_summary"
+  ]
+}
