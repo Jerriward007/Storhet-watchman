@@ -1,0 +1,25 @@
+{
+  "name": "Brand",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
