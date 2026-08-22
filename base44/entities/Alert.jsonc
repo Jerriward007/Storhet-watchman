@@ -1,0 +1,40 @@
+{
+  "name": "Alert",
+  "type": "object",
+  "properties": {
+    "brand_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Complaint Surge",
+        "Critical Mention",
+        "Viral Complaint",
+        "Service Outage",
+        "Fraud Report"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "type",
+    "severity",
+    "message"
+  ]
+}
