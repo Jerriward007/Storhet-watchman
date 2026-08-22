@@ -1,0 +1,43 @@
+{
+  "name": "Response",
+  "type": "object",
+  "properties": {
+    "mention_id": {
+      "type": "string"
+    },
+    "brand_name": {
+      "type": "string"
+    },
+    "draft_text": {
+      "type": "string"
+    },
+    "edited_text": {
+      "type": "string"
+    },
+    "final_text": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Draft",
+        "Pending Review",
+        "Approved",
+        "Rejected",
+        "Sent",
+        "Auto Sent"
+      ],
+      "default": "Draft"
+    },
+    "category": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "mention_id",
+    "draft_text"
+  ]
+}
