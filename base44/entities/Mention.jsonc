@@ -1,0 +1,95 @@
+{
+  "name": "Mention",
+  "type": "object",
+  "properties": {
+    "brand_id": {
+      "type": "string"
+    },
+    "brand_name": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "Nairaland",
+        "Twitter",
+        "Facebook",
+        "Instagram",
+        "LinkedIn",
+        "Blog",
+        "Forum",
+        "News",
+        "Review"
+      ]
+    },
+    "author": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "Positive",
+        "Negative",
+        "Neutral"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Positive",
+        "Inquiry",
+        "Complaint",
+        "Irrelevant"
+      ]
+    },
+    "topic": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ]
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "New",
+        "Reviewing",
+        "Responded",
+        "Ignored"
+      ],
+      "default": "New"
+    },
+    "ai_analysis": {
+      "type": "string"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assigned_to": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "brand_name",
+    "source",
+    "author",
+    "content",
+    "sentiment",
+    "category"
+  ]
+}
