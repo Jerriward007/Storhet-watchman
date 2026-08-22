@@ -27,7 +27,7 @@ export default function Reports() {
     mentions.forEach(m => rows.push([m.published_date, m.source, m.author, m.brand_name, m.sentiment, m.category, m.topic, m.priority, m.status, `"${m.content.replace(/"/g, '""')}"`]));
     const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `brandpulse-${activeBrand}-${period}.csv`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `Storhet-Watchman-${activeBrand}-${period}.csv`; a.click();
   };
 
   const reports = [
