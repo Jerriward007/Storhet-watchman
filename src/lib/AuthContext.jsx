@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-} from "react";
-
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 const AuthContext = createContext();
@@ -16,15 +10,16 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [appPublicSettings, setAppPublicSettings] = useState(null);
 
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
-      try {
-        setIsLoadingAuth(true);
-        setAuthError(null);
+      setIsLoadingAuth(true);
+      setAuthError(null);
 
+      try {
         const {
           data: { session },
           error,
@@ -48,15 +43,15 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error("Supabase auth check failed:", error);
 
-        if (mounted) {
-          setUser(null);
-          setIsAuthenticated(false);
-          setAuthError({
-            type: "unknown",
-            message: error.message || "Authentication failed",
-          });
-          setAuthChecked(true);
-        }
+        if (!mounted) return;
+
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthError({
+          type: "auth_error",
+          message: error.message || "Authentication failed",
+        });
+        setAuthChecked(true);
       } finally {
         if (mounted) {
           setIsLoadingAuth(false);
@@ -68,22 +63,20 @@ export const AuthProvider = ({ children }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!mounted) return;
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
 
-        if (session?.user) {
-          setUser(session.user);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
-
-        setAuthChecked(true);
-        setIsLoadingAuth(false);
+      if (session?.user) {
+        setUser(session.user);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
-    );
+
+      setAuthChecked(true);
+      setIsLoadingAuth(false);
+    });
 
     return () => {
       mounted = false;
@@ -94,18 +87,19 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
+      setAuthError(null);
 
       const {
-        data: { user },
+        data: { session },
         error,
-      } = await supabase.auth.getUser();
+      } = await supabase.auth.getSession();
 
       if (error) {
         throw error;
       }
 
-      if (user) {
-        setUser(user);
+      if (session?.user) {
+        setUser(session.user);
         setIsAuthenticated(true);
       } else {
         setUser(null);
@@ -113,12 +107,15 @@ export const AuthProvider = ({ children }) => {
       }
 
       setAuthChecked(true);
-      setAuthError(null);
     } catch (error) {
       console.error("User auth check failed:", error);
 
       setUser(null);
       setIsAuthenticated(false);
+      setAuthError({
+        type: "auth_error",
+        message: error.message || "Authentication failed",
+      });
       setAuthChecked(true);
     } finally {
       setIsLoadingAuth(false);
@@ -128,15 +125,15 @@ export const AuthProvider = ({ children }) => {
   const logout = async (shouldRedirect = true) => {
     try {
       await supabase.auth.signOut();
+
+      setUser(null);
+      setIsAuthenticated(false);
+
+      if (shouldRedirect) {
+        window.location.href = "/login";
+      }
     } catch (error) {
       console.error("Logout failed:", error);
-    }
-
-    setUser(null);
-    setIsAuthenticated(false);
-
-    if (shouldRedirect) {
-      window.location.href = "/login";
     }
   };
 
@@ -156,6 +153,7 @@ export const AuthProvider = ({ children }) => {
         isLoadingAuth,
         isLoadingPublicSettings,
         authError,
+        appPublicSettings,
         authChecked,
         logout,
         navigateToLogin,
