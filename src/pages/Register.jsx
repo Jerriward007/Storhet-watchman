@@ -33,9 +33,12 @@ export default function Register() {
 
   try {
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  email,
+  password,
+  options: {
+    emailRedirectTo: "https://storhetwatchman.vercel.app",
+  },
+});
 
     if (error) throw error;
 
