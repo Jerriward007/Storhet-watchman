@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+} from "react";
+
 import { supabase } from "@/lib/supabaseClient";
 
 const AuthContext = createContext();
@@ -10,28 +16,77 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [appPublicSettings, setAppPublicSettings] = useState(null);
 
   useEffect(() => {
-    checkUserAuth();
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        setIsLoadingAuth(true);
+        setAuthError(null);
+
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          throw error;
+        }
+
+        if (!mounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+
+        setAuthChecked(true);
+      } catch (error) {
+        console.error("Supabase auth check failed:", error);
+
+        if (mounted) {
+          setUser(null);
+          setIsAuthenticated(false);
+          setAuthError({
+            type: "unknown",
+            message: error.message || "Authentication failed",
+          });
+          setAuthChecked(true);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoadingAuth(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
-        setAuthError(null);
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
-      }
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!mounted) return;
 
-      setIsLoadingAuth(false);
-      setAuthChecked(true);
-    });
+        if (session?.user) {
+          setUser(session.user);
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+
+        setAuthChecked(true);
+        setIsLoadingAuth(false);
+      }
+    );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -39,7 +94,6 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
-      setAuthError(null);
 
       const {
         data: { user },
@@ -58,35 +112,31 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
       }
 
-      setIsLoadingAuth(false);
       setAuthChecked(true);
+      setAuthError(null);
     } catch (error) {
-      console.error("Supabase auth check failed:", error);
+      console.error("User auth check failed:", error);
 
       setUser(null);
       setIsAuthenticated(false);
-      setIsLoadingAuth(false);
       setAuthChecked(true);
-
-      setAuthError({
-        type: "auth_required",
-        message: error.message || "Authentication required",
-      });
+    } finally {
+      setIsLoadingAuth(false);
     }
   };
 
   const logout = async (shouldRedirect = true) => {
     try {
       await supabase.auth.signOut();
-
-      setUser(null);
-      setIsAuthenticated(false);
-
-      if (shouldRedirect) {
-        window.location.href = "/login";
-      }
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+
+    setUser(null);
+    setIsAuthenticated(false);
+
+    if (shouldRedirect) {
+      window.location.href = "/login";
     }
   };
 
@@ -106,7 +156,6 @@ export const AuthProvider = ({ children }) => {
         isLoadingAuth,
         isLoadingPublicSettings,
         authError,
-        appPublicSettings,
         authChecked,
         logout,
         navigateToLogin,
