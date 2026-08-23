@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,22 +21,35 @@ export default function Register() {
   const [otpCode, setOtpCode] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-    setLoading(true);
-    try {
-      await base44.auth.register({ email, password });
-      setShowOtp(true);
-    } catch (err) {
-      setError(err.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setError("");
+
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    alert(
+      "Account created successfully. Please check your email for the verification link."
+    );
+
+    window.location.href = "/login";
+  } catch (err) {
+    setError(err.message || "Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleVerify = async () => {
     setError("");
@@ -68,8 +81,10 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo());
-  };
+  setError(
+    "Google signup is not configured yet. Please use email and password."
+  );
+};
 
   if (showOtp) {
     return (
