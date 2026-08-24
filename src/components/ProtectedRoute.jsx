@@ -1,4 +1,5 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 
 const DefaultFallback = () => (
@@ -17,14 +18,17 @@ export default function ProtectedRoute({
     authChecked,
   } = useAuth();
 
+  useEffect(() => {
+    // Authentication is initialized by AuthContext.
+    // Nothing else is required here.
+  }, []);
+
   if (isLoadingAuth || !authChecked) {
     return fallback;
   }
 
   if (!isAuthenticated) {
-    return unauthenticatedElement || (
-      <Navigate to="/login" replace />
-    );
+    return unauthenticatedElement;
   }
 
   return <Outlet />;
